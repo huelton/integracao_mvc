@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
+import org.springframework.test.web.servlet.result.ViewResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import integracao.mvc.contatos.Contato;
@@ -57,4 +58,14 @@ public class AgendaControllerIntegrationTest {
 		resultActions.andExpect(status.is(Matchers.is(200)));
 		
 	}
+	
+	@Test
+	public void checarView() throws Exception {
+		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
+		ViewResultMatchers view = MockMvcResultMatchers.view();
+		
+		resultActions.andExpect(view.name("agenda"));
+		resultActions.andExpect(view.name(Matchers.is("agenda")));
+	}
+	
 }
