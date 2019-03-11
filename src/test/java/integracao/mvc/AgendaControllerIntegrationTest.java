@@ -1,5 +1,6 @@
 package integracao.mvc;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import integracao.mvc.contatos.Contato;
@@ -46,9 +48,13 @@ public class AgendaControllerIntegrationTest {
 	}
 	
 	@Test
-	public void status() throws Exception {
+	public void checarStatus() throws Exception {
 		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
-		resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+		StatusResultMatchers status = MockMvcResultMatchers.status();
+		
+		resultActions.andExpect(status.isOk());
+		resultActions.andExpect(status.is(200));
+		resultActions.andExpect(status.is(Matchers.is(200)));
 		
 	}
 }
