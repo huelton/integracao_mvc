@@ -1,7 +1,9 @@
 package integracao.mvc;
 
-import org.hamcrest.Matchers;
+import java.util.List;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,11 +16,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.result.ModelResultMatchers;
-import org.springframework.test.web.servlet.result.StatusResultMatchers;
-import org.springframework.test.web.servlet.result.ViewResultMatchers;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.ModelAndView;
 
 import integracao.mvc.contatos.Contato;
 
@@ -52,22 +52,22 @@ public class AgendaControllerIntegrationTest {
 
 	@Test
 	public void checarStatus() throws Exception {
-		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
-		StatusResultMatchers status = MockMvcResultMatchers.status();
+		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));		
+		resultActions.andDo(MockMvcResultHandlers.print());
 		
-		resultActions.andExpect(status.isOk());
-		resultActions.andExpect(status.is(200));
-		resultActions.andExpect(status.is(Matchers.is(200)));
+		Integer status = resultActions.andReturn().getResponse().getStatus();
+		
+		Assert.assertTrue(status.equals(200));
 		
 	}
 	
 	@Test
 	public void checarView() throws Exception {
 		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
-		ViewResultMatchers view = MockMvcResultMatchers.view();
+		resultActions.andDo(MockMvcResultHandlers.print());
+		ModelAndView mav = resultActions.andReturn().getModelAndView();
 		
-		resultActions.andExpect(view.name("agenda"));
-		resultActions.andExpect(view.name(Matchers.is("agenda")));
+		Assert.assertEquals("agenda", mav.getViewName());
 		
 		
 
@@ -76,17 +76,13 @@ public class AgendaControllerIntegrationTest {
 	@Test
 	public void checarModel() throws Exception {
 		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
-		ModelResultMatchers model = MockMvcResultMatchers.model();
+		resultActions.andDo(MockMvcResultHandlers.print());
 		
-		resultActions.andExpect(model.attributeExists("contatos"));
-		resultActions.andExpect(model.attribute("contatos", Matchers.hasSize(1)));
+		ModelAndView mav = resultActions.andReturn().getModelAndView();
 		
-		resultActions.andExpect(model.attribute("contatos",
-				                Matchers.hasItem(Matchers.allOf(Matchers.hasProperty("id", Matchers.is(contato.getId())),
-				                		                        Matchers.hasProperty("nome", Matchers.is(contato.getNome())),
-				                		                        Matchers.hasProperty("ddd", Matchers.is(contato.getDdd())),
-				                		                        Matchers.hasProperty("telefone", Matchers.is(contato.getTelefone()))
-				                		)))); 
+		List<Contato> contatos = (List<Contato>) mav.getModel().get("contatos");
+		Assert.assertEquals(1, contatos.size());
+		Assert.assertTrue(contatos.contains(contato));
 
 	}
 }
