@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.result.ModelResultMatchers;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.test.web.servlet.result.ViewResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,7 @@ public class AgendaControllerIntegrationTest {
 		testEntityManager.getEntityManager().createQuery("DELETE FROM Contato").executeUpdate();
 	}
 	
+
 	@Test
 	public void checarStatus() throws Exception {
 		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
@@ -66,6 +68,25 @@ public class AgendaControllerIntegrationTest {
 		
 		resultActions.andExpect(view.name("agenda"));
 		resultActions.andExpect(view.name(Matchers.is("agenda")));
+		
+		
+
 	}
 	
+	@Test
+	public void checarModel() throws Exception {
+		ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/agenda/"));
+		ModelResultMatchers model = MockMvcResultMatchers.model();
+		
+		resultActions.andExpect(model.attributeExists("contatos"));
+		resultActions.andExpect(model.attribute("contatos", Matchers.hasSize(1)));
+		
+		resultActions.andExpect(model.attribute("contatos",
+				                Matchers.hasItem(Matchers.allOf(Matchers.hasProperty("id", Matchers.is(contato.getId())),
+				                		                        Matchers.hasProperty("nome", Matchers.is(contato.getNome())),
+				                		                        Matchers.hasProperty("ddd", Matchers.is(contato.getDdd())),
+				                		                        Matchers.hasProperty("telefone", Matchers.is(contato.getTelefone()))
+				                		)))); 
+
+	}
 }
